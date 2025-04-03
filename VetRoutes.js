@@ -3,11 +3,11 @@ const router = express.Router();
 
 //insert model
 
-const Vets = require("../model/VetModel");
+const Vets = require("../Model/VetModel");
 
 //insert user controller
 
-const VetController = require("../controllers/VetControllers");
+const VetController = require("../Controllers/VetControllers");
 
 router.get("/",VetController.getAllVets);
 router.post("/",VetController.addVets);

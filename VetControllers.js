@@ -1,4 +1,4 @@
-const VetModel = require("../model/VetModel");
+const VetModel = require("../Model/VetModel");
 
 // Get all vets
 const getAllVets = async (req, res, next) => {
