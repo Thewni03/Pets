@@ -1,23 +1,15 @@
 const express = require("express");
 const router = express.Router();
+//insert model
+const User = require("../Model/UserModel");
+//Insert User controller
+const UserController = require("../controllers/UserControllers");
 
+router.get("/",UserController.getAllUsers);
+router.post("/",UserController.addUsers);
+router.get("/:id",UserController.getById);
+router.put("/:id",UserController.updateUser);
+router.delete("/:id",UserController.deleteUser);
 
-const User = require("../model/UserModel");
-
-
-const UserControl = require("../controllers/UserControl");
-
-//diet ai
-const AiControl = require("../controllers/AiControl"); 
-
-
-router.get("/", UserControl.getAllUsers);
-router.post("/", UserControl.addusers);
-router.get("/:userId", UserControl.getById);
-router.put("/:userId", UserControl.updateUser);
-router.delete("/:userId", UserControl.deleteUser);
-
-
-router.post("/ai-response", AiControl.getAiResponse); 
-
+//export
 module.exports = router;
