@@ -1,35 +1,39 @@
 const mongoose = require("mongoose");
-const Schema = mongoose.Schema; 
+const Schema = mongoose.Schema;
 
-const UserSchema = new Schema({
-    userId: {
-        type: String,
-        required: true,
-        unique: true, 
-    },
-    name: {
+const userSchema = new Schema({
+    Petname: {
         type: String,
         required: true,
     },
-    email: {
-        type: String,
-        required: true,
-        unique: true,
-        lowercase: true, 
-    },
-    password: {
+    Species: {
         type: String,
         required: true,
     },
-    role: {
-        type: String,
-        enum: ["admin", "vet", "rescue_center", "pet_owner"], 
+    Age: {
+        type: Number,
         required: true,
     },
-    phone: {
+    Gender: {
         type: String,
+        required: true,
+    },
+    Breed: {
+        type: String,
+        required: true,
+    },
+    Bday: {
+        type: Date, // changed from String to Date
+        required: true,
+    },
+    Address: {
+        type: String,
+        required: true,
+    },
+    Num: {
+        type: String, // changed from Number to String for phone number
         required: true,
     }
 });
 
-module.exports = mongoose.model("UserModel", UserSchema); 
+module.exports = mongoose.model("UserModel", userSchema);
