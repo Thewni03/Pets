@@ -1,0 +1,56 @@
+.user-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    margin: 20px auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+.user-card:hover {
+    transform: scale(1.05);
+}
+
+.user-card-header {
+    background: #007bff; /* Changed to the requested blue color */
+    color: white;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+}
+
+.user-card-body {
+    padding: 10px;
+}
+
+.user-card-actions {
+    margin-top: 15px;
+}
+
+.update-btn, .delete-btn {
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.update-btn {
+    background: #A29BFE; /* Light purple color */
+    color: white;
+}
+
+.update-btn:hover {
+    background: #8c82d2; /* Slightly darker shade for hover */
+}
+
+.delete-btn {
+    background: #cc2020; /* Red color */
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c0392b; /* Darker red for hover */
+}

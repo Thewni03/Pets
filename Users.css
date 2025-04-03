@@ -1,0 +1,105 @@
+/* Users Page Styles */
+.users-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    background-color: #f7f7f7;
+}
+
+/* Title */
+.users-container h1 {
+    color: #007bff; /* Blue title */
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+/* Search Bar Styles */
+.users-container input[type="text"] {
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    width: 250px;
+    margin-right: 10px;
+    margin-bottom: 1rem;
+}
+
+.users-container button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.users-container button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+/* No Results Message */
+.no-results {
+    color: #ff4c4c;
+    font-size: 1.2rem;
+    margin-top: 1rem;
+}
+
+/* User Card Styling */
+.user-card {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    padding: 20px;
+    width: 300px;
+    text-align: center;
+    margin: 20px auto;
+    transition: transform 0.3s ease-in-out;
+}
+
+.user-card:hover {
+    transform: scale(1.05);
+}
+
+.user-card-header {
+    background: #007bff; /* Blue background */
+    color: white;
+    padding: 10px;
+    border-radius: 10px 10px 0 0;
+}
+
+.user-card-body {
+    padding: 10px;
+}
+
+.user-card-actions {
+    margin-top: 15px;
+}
+
+.update-btn, .delete-btn {
+    border: none;
+    padding: 10px 15px;
+    margin: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.update-btn {
+    background: #A29BFE; /* Light purple */
+    color: white;
+}
+
+.update-btn:hover {
+    background: #8c82d2;
+}
+
+.delete-btn {
+    background: #ff4c4c; /* Red color */
+    color: white;
+}
+
+.delete-btn:hover {
+    background: #c0392b;
+}
