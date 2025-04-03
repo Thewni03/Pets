@@ -1,21 +1,24 @@
-//pass= 7AAAXNPecWdORCB8
-
 const express = require("express");
 const mongoose = require("mongoose");
-const router = require("./Routes/UserRoutes");
+const cors = require("cors");  
+const router = require("./Routes/VetRoutes");
 
 const app = express();
-const cors = require("cors");
 
-//middleware
+// Middleware
+app.use(cors());  
 app.use(express.json());
-app.use(cors());
-app.use("/dogs",router);
+app.use("/vets", router);  
 
-
-mongoose.connect("mongodb+srv://thewni2003:Thew123@cluster0.jk5xl.mongodb.net/dogs")
-.then(()=> console.log("Connected to mongoDB"))
-.then(() => {
-    app.listen(5008);
-})
-.catch((err)=> console.log((err)));
+// MongoDB connection
+mongoose.connect("mongodb+srv://thewni2003:Thew123@cluster0.jk5xl.mongodb.net/vets")
+    .then(() => {
+        console.log("✅ Connected to MongoDB");
+        app.listen(5008, () => {
+            console.log("🚀 Server is running on port 5008");
+        });
+    })
+    .catch((err) => {
+        console.error("❌ MongoDB connection error:", err);
+        process.exit(1);  // Exit the process if DB connection fails
+    });
