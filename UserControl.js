@@ -32,7 +32,7 @@ const getById = async (req, res) => {
     const userId = req.params.userId;
 
     try {
-        const user = await User.findOne({ userId: userId });  // Find by userId, not by MongoDB's _id
+        const user = await User.findOne({ userId: userId }); 
         if (!user) {
             return res.status(404).json({ message: "Unable to find user" });
         }
@@ -45,22 +45,21 @@ const getById = async (req, res) => {
 
 
 
-// Update user details// Update user details
+//update
 const updateUser = async (req, res) => {
-    const userId = req.params.userId;  // Extract userId from params
-    const { userId: newUserId, name, email, password, role, phone } = req.body; // New data
-
+    const userId = req.params.userId; 
+    const { userId: newUserId, name, email, password, role, phone } = req.body; 
     try {
         console.log(`Attempting to update user with userId: ${userId}`);
 
-        // Find and update the user by userId
+     
         const updatedUser = await User.findOneAndUpdate(
-            { userId: userId }, // Use userId to find the user
-            { userId: newUserId, name, email, password, role, phone }, // Data to update
-            { new: true } // Ensure the updated document is returned
+            { userId: userId },
+            { userId: newUserId, name, email, password, role, phone }, 
+            { new: true } 
         );
 
-        // Check if the user was found and updated
+   
         if (!updatedUser) {
             return res.status(404).json({ message: "Unable to update user" });
         }
@@ -74,9 +73,9 @@ const updateUser = async (req, res) => {
 };
 
 
-// Delete user
+// Delete 
 const deleteUser = async (req, res) => {
-    const id = req.params.userId; // Fixed variable name
+    const id = req.params.userId; 
 
     try {
         const deletedUser = await User.findByIdAndDelete(id);
