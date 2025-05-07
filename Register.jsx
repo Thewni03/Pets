@@ -2,11 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext.jsx';
 import { useForm } from 'react-hook-form';
-import { LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 import React from 'react';
+import { UserIcon, LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
 
-export default function Login() {
-  const { login } = useAuth();
+export default function Register() {
+  const { register: registerUser } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const {
@@ -17,19 +17,19 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      await login(data);
+      await registerUser(data);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+      setError(err.response?.data?.message || 'Registration failed');
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
+      <div className="w-full max-w-md mx-auto bg-gray-800 rounded-2xl overflow-hidden shadow-xl border border-gray-700">
         <div className="bg-gradient-to-r from-purple-600 to-blue-500 p-6 text-center">
-          <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="text-blue-100 mt-2 opacity-90">Sign in to continue</p>
+          <h1 className="text-3xl font-bold text-white">Create Account</h1>
+          <p className="text-blue-100 mt-2">Join our platform today</p>
         </div>
         
         <div className="p-8">
@@ -43,6 +43,31 @@ export default function Login() {
           )}
           
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Name
+              </label>
+              <div className="relative rounded-lg shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <UserIcon className="h-5 w-5 text-gray-400" />
+                </div>
+                <input
+                  type="text"
+                  {...register('name', { required: 'Name is required' })}
+                  className="bg-gray-700 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 py-3 border-gray-600 rounded-lg placeholder-gray-400 transition duration-200"
+                  placeholder="Your Name"
+                />
+              </div>
+              {errors.name && (
+                <p className="mt-2 text-sm text-red-400 flex items-center">
+                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  {errors.name.message}
+                </p>
+              )}
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
                 Email
@@ -78,7 +103,13 @@ export default function Login() {
                 </div>
                 <input
                   type="password"
-                  {...register('password', { required: 'Password is required' })}
+                  {...register('password', {
+                    required: 'Password is required',
+                    minLength: {
+                      value: 8,
+                      message: 'Password must be at least 8 characters',
+                    },
+                  })}
                   className="bg-gray-700 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 py-3 border-gray-600 rounded-lg placeholder-gray-400 transition duration-200"
                   placeholder="••••••••"
                 />
@@ -93,30 +124,11 @@ export default function Login() {
               )}
             </div>
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-500 focus:ring-blue-600 border-gray-500 rounded bg-gray-700"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
-                  Remember me
-                </label>
-              </div>
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-400 hover:text-blue-300 transition duration-150">
-                  Forgot password?
-                </a>
-              </div>
-            </div>
-
             <button
               type="submit"
               className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
             >
-              Sign in
+              Create Account
             </button>
           </form>
           
@@ -127,17 +139,17 @@ export default function Login() {
               </div>
               <div className="relative flex justify-center text-sm">
                 <span className="px-2 bg-gray-800 text-gray-400">
-                  New to our platform?
+                  Already have an account?
                 </span>
               </div>
             </div>
             
             <div className="mt-6">
               <a
-                href="/register"
+                href="/login"
                 className="w-full flex justify-center py-2.5 px-4 border border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-200 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200"
               >
-                Create an account
+                Sign in instead
               </a>
             </div>
           </div>
