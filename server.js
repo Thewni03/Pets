@@ -1,40 +1,35 @@
-import express from 'express'
-import cors from 'cors'
-import 'dotenv/config'
-import connectDB from './config/mongodb.js'
-import adminRouter from './routes/adminRoute.js'
-import path, { dirname } from 'path'
-import { fileURLToPath } from 'url';
-import doctorRouter from './routes/doctorRoute.js'
-import userRouter from './routes/userRoute.js'
+import dotenv from 'dotenv'
+dotenv.config()
+import express from 'express';
+import cors from 'cors';
+import connectDB from './config/db.js';
+import userRouter from './routes/userRoutes.js';
+import ticketrouter from './routes/ticketRoutes.js';
 
-// App configuration
-const app = express()
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
-// Serve static files from the 'uploads' directory
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+const app = express();
 
-// Set the port
-const port = process.env.PORT || 5008
+// Middleware
+app.use(cors({
+  origin: 'http://localhost:5173', // frontend URL
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+})); // CORS
 
-// Connect to the database
-connectDB()
+app.use(express.json()); 
 
-// Middleware to parse JSON and URL-encoded data, and enable CORS
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
-app.use(cors())
+//connect db
+connectDB();
 
-// API routes
-app.use('/api/admin', adminRouter)  // e.g., localhost:5008/api/admin/add-doctor
-app.use('/api/doctor', doctorRouter)  // e.g., localhost:5008/api/doctor/list
-app.use('/api/user', userRouter)  // e.g., localhost:5008/api/user/signup
+//call the user models: router -> controller -> models
+app.use('/api/user', userRouter)
+app.use('/api/tickets', ticketrouter)
 
-// Basic route to check if the server is running
-app.get('/', (req, res) => {
-    res.send('API working')
-})
 
-// Start the server
-app.listen(port, () => console.log(`Server started on port ${port}`))
+//start server
+const PORT = process.env.PORT || 5001;
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}` );
+});
