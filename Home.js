@@ -5,7 +5,7 @@ function Home() {
   return (
     <div>
             <Nav/>
-        <h1>Home new</h1>
+        <h1>Welcome to Pet Universe</h1>
     </div>
   )
 }
