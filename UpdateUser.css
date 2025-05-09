@@ -1,4 +1,4 @@
-.add-user-container {
+.update-user-container {
     max-width: 450px;
     margin: 40px auto;
     padding: 30px;
@@ -6,27 +6,27 @@
     border-radius: 20px;
     box-shadow: 0 8px 20px rgba(255, 167, 132, 0.2);
     font-family: 'Poppins', sans-serif;
-  }
-  
-  .add-user-container h1 {
+}
+
+.update-user-container h1 {
     text-align: center;
     color: #FF6F61;
     margin-bottom: 25px;
     font-weight: 700;
-  }
-  
-  .add-user-container form {
+}
+
+.update-user-container form {
     display: flex;
     flex-direction: column;
-  }
-  
-  .add-user-container label {
+}
+
+.update-user-container label {
     margin-bottom: 8px;
     color: #FF6F61;
     font-weight: 600;
-  }
-  
-  .add-user-container input {
+}
+
+.update-user-container input {
     padding: 12px;
     border: 1px solid #FFB199;
     border-radius: 12px;
@@ -34,15 +34,22 @@
     font-size: 15px;
     background-color: #FFF5F0;
     transition: 0.3s ease;
-  }
-  
-  .add-user-container input:focus {
+}
+
+.update-user-container input:focus {
     border-color: #FF6F61;
     outline: none;
     background-color: #FFEDE5;
-  }
-  
-  .add-user-container button {
+}
+
+.update-user-container .error {
+    color: red;
+    font-size: 14px;
+    margin-top: -15px;
+    margin-bottom: 10px;
+}
+
+.update-user-container button {
     padding: 14px;
     background: linear-gradient(90deg, #FF6F61, #FF9671);
     color: #fff;
@@ -52,21 +59,31 @@
     font-weight: 600;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
-  }
-  
-  .add-user-container button:hover {
+}
+
+.update-user-container button:hover {
     transform: scale(1.02);
     box-shadow: 0 6px 16px rgba(255, 167, 132, 0.4);
-  }
-  
-  .add-user-container button:active {
+}
+
+.update-user-container button:active {
     transform: scale(0.98);
-  }
-  
-  @media (max-width: 500px) {
-    .add-user-container {
-      margin: 20px;
-      padding: 20px;
+}
+
+@media (max-width: 500px) {
+    .update-user-container {
+        margin: 20px;
+        padding: 20px;
     }
-  }
-  
+}
+.update-user-container input {
+    margin-bottom: 30px; 
+}
+
+.update-user-container select {
+    margin-bottom: 30px;
+}
+
+.update-user-container .error {
+    margin-bottom: 15px; 
+}

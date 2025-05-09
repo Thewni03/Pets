@@ -1,36 +1,31 @@
 import React from 'react';
-import './Nav.css';
+import './nav.css';
 import { Link } from 'react-router-dom';
-
 
 function Nav() {
   return (
     <div>
-      <ul className="home-ul">
-        <li className="home-ll">
-          <Link to="/vets" className="active home-a">
-            <h1>Pets</h1>
-          </Link>
-        </li>
-      
-        <li className="home-ll">
-          <Link to="/vetForm" className="active home-a">
-            <h1>vetForm</h1>
-          </Link>
-        </li>
-        <li className="home-ll">
-          <Link to="/login" className="active home-a">
-            <h1>Login</h1>
-          </Link>
-        </li>
-        <li className="home-ll">
-          <Link to="/logout" className="active home-a">
-            <h1>Logout</h1>
-          </Link>
-        </li>
-      </ul>
+        <ul className="home-ul">
+            
+            <li className="home-ll">
+            <Link to="/petvacdetails" className="active home-a">
+                <h1>Pet vaccination details</h1>
+                </Link>
+            </li>
+            <li className="home-ll">
+            <Link to="/petdetails" className="active home-a">
+                <h1>Pet Details</h1>
+                </Link>
+            </li>
+
+            <li className="home-ll">
+            <Link to="/imgpart" className="active home-a">
+                <h1>Photo Gallery</h1>
+                </Link>
+            </li>
+        </ul>
     </div>
-  );
+  )
 }
 
-export default Nav; 
+export default Nav

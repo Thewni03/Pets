@@ -1,0 +1,56 @@
+.user-card {
+    background-color: #FFF5F0;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(255, 167, 132, 0.2);
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.pet-info p {
+    font-size: 16px;
+    margin: 5px 0;
+    color: #333;
+}
+
+.button-container {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.update-button {
+    padding: 10px 16px;
+    background: linear-gradient(90deg, #4CAF50, #66BB6A);
+    color: white;
+    margin-top: 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+    border: none;
+}
+
+.delete-button {
+    padding: 10px 16px;
+    background: linear-gradient(90deg, #FF6F61, #FF9671);
+    color: white;
+    margin-top: 10px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: center;
+    border: none;
+}
+
+.update-button:hover, .delete-button:hover {
+    transform: scale(1.05);
+}
+
+.update-button:active, .delete-button:active {
+    transform: scale(0.98);
+}
