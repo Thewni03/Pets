@@ -1,24 +1,92 @@
+//pass= 7AAAXNPecWdORCB8
+
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");  
-const router = require("./Routes/VetRoutes");
+const router = require("./Routes/UserRoutes");
+const multer = require("multer");
+const fs = require('fs');
 
 const app = express();
+const cors = require("cors");
 
-// Middleware
-app.use(cors());  
+//middleware
 app.use(express.json());
-app.use("/vets", router);  
+app.use(cors());
+app.use("/users",router);
 
-// MongoDB connection
-mongoose.connect("mongodb+srv://thewni2003:Thew123@cluster0.jk5xl.mongodb.net/vets")
-    .then(() => {
-        console.log("✅ Connected to MongoDB");
-        app.listen(5008, () => {
-            console.log("🚀 Server is running on port 5008");
+// Create uploads directory if it doesn't exist
+if (!fs.existsSync('./uploads')) {
+    fs.mkdirSync('./uploads');
+}
+
+mongoose.connect("mongodb+srv://admin:7AAAXNPecWdORCB8@cluster0.l4yrb.mongodb.net/pets")
+.then(()=> console.log("Connected to mongoDB"))
+.then(() => {
+    app.listen(5001);
+})
+.catch((err)=> console.log((err)));
+
+///////////
+//image part
+require("./Model/ImgModel");
+const ImgSchema = mongoose.model("ImgModel");
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, './uploads');
+    },
+    filename: function (req, file, cb) {
+        const uniqueSuffix = Date.now();
+        cb(null, uniqueSuffix + '-' + file.originalname);
+    }
+});
+
+const upload = multer({ storage: storage });
+
+// Serve static files from uploads directory
+app.use('/files', express.static('uploads'));
+
+app.post("/uploadImg", upload.single("image"), async (req, res) => {
+    console.log(req.body);
+    const imageName = req.file.filename;
+
+    try {
+        await ImgSchema.create({ image: imageName });
+        res.json({ status: "ok" });
+    } catch (error) {
+        res.json({ status: error });
+    }
+});
+
+//Displaying IMG
+app.get("/getImage", async (req, res) => {
+    try {
+        ImgSchema.find({}).then((data) => {
+            res.send({ status: "ok", data: data });
         });
-    })
-    .catch((err) => {
-        console.error("❌ MongoDB connection error:", err);
-        process.exit(1);  // Exit the process if DB connection fails
-    });
+    } catch (error) {
+        res.json({ status: error });
+    }
+});
+
+// Delete image
+app.delete("/deleteImage/:id", async (req, res) => {
+    try {
+        const image = await ImgSchema.findById(req.params.id);
+        if (!image) {
+            return res.status(404).json({ status: "Image not found" });
+        }
+
+        // Delete file from uploads folder
+        const filePath = `./uploads/${image.image}`;
+        if (fs.existsSync(filePath)) {
+            fs.unlinkSync(filePath);
+        }
+
+        // Delete from database
+        await ImgSchema.findByIdAndDelete(req.params.id);
+        res.json({ status: "ok" });
+    } catch (error) {
+        res.status(500).json({ status: error.message });
+    }
+});

@@ -23,7 +23,7 @@ const userSchema = new Schema({
         required: true,
     },
     Bday: {
-        type: Date, // changed from String to Date
+        type: Date, // <-- changed from String to Date
         required: true,
     },
     Address: {
@@ -31,7 +31,7 @@ const userSchema = new Schema({
         required: true,
     },
     Num: {
-        type: String, // changed from Number to String for phone number
+        type: Number,
         required: true,
     }
 });
