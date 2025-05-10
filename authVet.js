@@ -1,16 +1,15 @@
 import jwt from "jsonwebtoken";
 
-//user auth
-const authUser = async (req, res, next) => {
+//vet auth
+const authVet = async (req, res, next) => {
     try {
-        const { token } = req.headers
-        if(!token){
+        const { dtoken } = req.headers
+        if(!dtoken){
             return res.json({success: false, message: "Authorization failed.Log in again."})
         }
 
-        const token_decode = jwt.verify(token, process.env.JWT_SECRET)
-        req.userId = token_decode.id;
-        req.body.userId = token_decode.id
+        const token_decode = jwt.verify(dtoken, process.env.JWT_SECRET)
+        req.body.docId = token_decode.id
         next()
         
     } catch (error) {
@@ -19,4 +18,4 @@ const authUser = async (req, res, next) => {
     }
 }
 
-export default authUser
+export default authVet
