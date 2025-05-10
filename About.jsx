@@ -6,12 +6,12 @@ const About = () => {
     <div className="bg-white py-4 sm:py-2">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base/7 font-semibold text-indigo-600">About PetCare+ </h2>
+          <h2 className="text-base/7 font-semibold text-indigo-600">About PetUniverse </h2>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl lg:text-balance">
             Caring for Your Pets, Anytime, Anywhere
           </p>
           <p className="mt-6 text-lg/8 text-gray-600">
-            PetCare+ is your trusted companion in ensuring your pet’s well-being. We provide a seamless platform to track
+            PetUniverse is your trusted companion in ensuring your pet’s well-being. We provide a seamless platform to track
             health records, connect with vets, and receive personalized care recommendations for your furry friends.
           </p>
         </div>
