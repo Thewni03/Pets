@@ -1,46 +1,45 @@
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import React from 'react';
-import { AuthProvider } from './context/AuthContext.jsx';
-import PrivateRoute from './components/PrivateRoute';
-import AdminRoute from './components/AdminRoute';
-import Login from './pages/auth/Login';
-import Register from './pages/auth/Register';
-import Dashboard from './pages/Dashboard';
-import CreateTicket from './pages/tickets/CreateTicket';
-import TicketList from './pages/tickets/TicketList';
-import TicketDetail from './pages/tickets/TicketDetail';
-import TicketResponse from './pages/tickets/TicketResponse';
+import { Route, Routes } from 'react-router-dom';
+import "tailwindcss";
+import Home from './pages/Home';
+import Doctors from './pages/Doctors';
+import MyAppointments from './pages/MyAppointments';
+import Appointment from './pages/Appointment';
 import Navbar from './components/Navbar';
-import { Toaster } from 'react-hot-toast';
+import Login from './pages/Login';
+import About from './pages/About';
+import Contact from './pages/Contact';
+import MyProfile from './pages/MyProfile';
+import Footer from './components/Footer';
+import { ToastContainer } from 'react-toastify';
+import SuccessPage from './pages/SuccessPage';
+import ErrorPage from './pages/ErrorPage';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentCancel from './pages/PaymentCancel';
 
-function App() {
+const App = () => {
   return (
-    <AuthProvider>
-      <Router>
-        <div className="min-h-screen bg-gray-100">
-          <Navbar />
-          <div className="container mx-auto px-4 py-8">
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/register" element={<Register />} />
-              
-              <Route element={<PrivateRoute />}>
-                <Route path="/" element={<Dashboard />} />
-                <Route path="/create-ticket" element={<CreateTicket />} />
-                <Route path="/tickets/:id" element={<TicketDetail />} />
-                
-                <Route element={<AdminRoute />}>
-                  <Route path="/tickets" element={<TicketList />} />
-                  <Route path="/tickets/:id/respond" element={<TicketResponse />} />
-                </Route>
-              </Route>
-            </Routes>
-          </div>
-        </div>
-        <Toaster position="top-right" />
-      </Router>
-    </AuthProvider>
+    <div className='mx-4 sm:mx-[10%]'>
+      <ToastContainer />
+      <Navbar />
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path='/doctors' element={<Doctors />} />
+        <Route path='/doctors/:speciality' element={<Doctors />} />
+        <Route path='/login' element={<Login />} />
+        <Route path='/about' element={<About />} />
+        <Route path='/contact' element={<Contact />} />
+        <Route path='/my-profile' element={<MyProfile />} />
+        <Route path='/my-appointments' element={<MyAppointments />} />
+        <Route path="/success" element={<SuccessPage />} />
+        <Route path="/error" element={<ErrorPage />} />
+        <Route path='/appointment/:docId' element={<Appointment />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancel" element={<PaymentCancel />} />
+      </Routes>
+      <Footer />
+    </div>
   );
-}
+};
 
-export default App;
+export default App

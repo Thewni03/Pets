@@ -9,7 +9,7 @@ import axios from 'axios';
 
 const Appointment = () => {
     const {docId} = useParams();
-    const {doctors, currencySymbol, backendUrl, token, getDoctorsData } = useContext(AppContext);
+    const {doctors, currencySymbol, backendUrl, token, getDoctorsData, pets} = useContext(AppContext);
     const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
 
     const navigate = useNavigate()
@@ -18,6 +18,7 @@ const Appointment = () => {
     const [docSlots, setDocSlots] = useState([]);
     const [slotIndex, setSlotIndex] = useState(0);
     const [slotTime, setSlotTime] = useState('');
+    const [selectedPet, setSelectedPet] = useState('');
 
     const fetchDocInfo = async () => {
         const docInfo = doctors.find(doc => doc._id === docId)
@@ -25,6 +26,8 @@ const Appointment = () => {
     }
 
     const getAvailableSlots = async () => {
+        if (!docInfo) return;
+
         setDocSlots([]);
     
         let today = new Date(); // Current date
@@ -60,17 +63,30 @@ const Appointment = () => {
             while (currentDate < endTime) {
                 let formattedTime = currentDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
     
-                timeSlots.push({
-                    datetime: new Date(currentDate),
-                    time: formattedTime
-                });
-    
+
+                let day = currentDate.getDate()
+                let month = currentDate.getMonth() + 1;
+                let year = currentDate.getFullYear()
+                const slotDate = `${day}_${month}_${year}`
+
+                const slotTimeStr = formattedTime
+                const isSlotAvailable = !(
+                    docInfo.slots_booked?.[slotDate]?.includes(slotTimeStr)
+                )
+                //const isSlotAvailable = docInfo.slots_booked[slotDate] && docInfo.slots_booked[slotDate].includes(slotTime) ? false : true
+                
+                if(isSlotAvailable){
+                    timeSlots.push({
+                        datetime: new Date(currentDate),
+                        time: formattedTime
+                    });
+        
+                }
+                
                 // Increment by 30 minutes
                 currentDate.setMinutes(currentDate.getMinutes() + 30);
             }
             
-            
-
             if (timeSlots.length > 0) {
                 slotsArray.push(timeSlots);
             }
@@ -119,27 +135,65 @@ const Appointment = () => {
 
             const slotDate = day + "_" + month + "_" + year
 
-            const { data } = await axios.post(`${backendUrl}/api/user/book-appointment`, {docId, slotDate, slotTime}, {headers:{token}})
+            if (!slotTime) {
+                toast.error("Please select a time slot");
+                return;
+            }
+
+            if (!selectedPet) {
+                toast.error("Please select a pet");
+                return;
+            }
+    
+
+            const { data } = await axios.post(`${backendUrl}/api/user/book-appointment`, {docId, slotDate, slotTime, petId: selectedPet}, {headers:{token}})
+            // const response = await axios.post(`${backendUrl}/api/user/book-appointment`, 
+            //     { docId, slotDate, slotTime, petId: selectedPet }, 
+            //     { headers: { token } }
+            // );
+            
+            // const { data } = response;
+            console.log("Full API Response:", data);
+
             if (data.success) {
                 toast.success(data.message)
                 getDoctorsData()
-                navigate('/my-appointments')
+
+                if (!data.userData || !data.pets) {
+                    toast.error("Incomplete data received from server.");
+                    return;
+                }
+
+                navigate('/success', {
+                    state: {
+                        id: data.userData?._id,
+                        petName: data.petData?.name || "No Pet",
+                        ownerName: data.userData?.name || "Unknown",
+                        doctor: docInfo.name,
+                        date: slotDate,
+                        time: slotTime,
+                        fees: `${currencySymbol} ${docInfo.fees}`
+                    }
+                })
             } else{
                 toast.error(data.message)
             }
         } catch (error) {
             console.log(error)
             toast.error(error.message)
+            navigate('/error')
         }
     }
     
+    console.log("Pets in context:", pets);
+    console.log("Selected Pet ID:", selectedPet);
 
     useEffect(()=>{
         fetchDocInfo()
     },[doctors, docId])
 
     useEffect(()=>{
-        getAvailableSlots()
+        if (docInfo) getAvailableSlots();
     },[docInfo])
 
     useEffect(()=>{
@@ -149,12 +203,13 @@ const Appointment = () => {
     },[docSlots])
     console.log("Doctor Image URL:", docInfo?.image);
 
+    
     return docInfo && (
         <div>
             {/* Doctor details */}
             <div className='flex flex-col sm:flex-row gap-4'>
                 <div>
-                    <img className='bg-primary w-full sm:max-w-72 rounded-lg' src={`${backendUrl}/uploads/${docInfo.image}`} alt="" />
+                    <img className='bg-primary w-full sm:max-w-72 rounded-lg' src={docInfo.image} alt="" />
                 </div>
                 <div className='flex-1 border border-gray-400 rounded-lg p-8 py-7 bg-white mx-2 sm:mx-0 mt-[-80px] sm:mt-0'>
                     {/* Doc info: name,degree,experience */}
@@ -204,6 +259,39 @@ const Appointment = () => {
                         ))
                     }
                 </div>
+                {/* Pet Selection */}
+                <div className='mt-6'>
+                    <select
+                        value={selectedPet}
+                        onChange={(e) => setSelectedPet(e.target.value)}
+                        disabled={!token || pets.length === 0}
+                        className='border p-2 rounded w-full bg-white disabled:bg-gray-100 disabled:text-gray-400'
+                    >
+                        {!token && <option>No pets available. Please login.</option>}
+                        {token && pets.length === 0 && <option>No pets found. Please add one.</option>}
+                        {token && pets.length > 0 && (
+                        <>
+                            <option value="">Select a pet</option>
+                            {pets.map((pet) => (
+                            <option key={pet._id} value={pet._id}>
+                                {pet.name} ({pet.type})
+                            </option>
+                            ))}
+                        </>
+                        )}
+                    </select>
+
+                    {/* Optional Add Pet Button when logged in but no pets */}
+                    {token && pets.length === 0 && (
+                        <button
+                        onClick={() => navigate('/my-profile')}
+                        className='mt-3 bg-blue-500 text-white px-4 py-2 rounded'
+                        >
+                        Add Pet
+                        </button>
+                    )}
+                    </div>
+
                 <button onClick={bookAppointment} className='bg-green-400 text-white font-light px-14 py-3 rounded-full my-12 cursor-pointer'>Book appointment</button>
             </div>
 

@@ -1,148 +1,80 @@
-import { useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react'
+import { AppContext } from '../context/AppContext';
+import axios from 'axios'
+import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext.jsx';
-import { useForm } from 'react-hook-form';
-import { LockClosedIcon, EnvelopeIcon } from '@heroicons/react/24/outline';
-import React from 'react';
 
-export default function Login() {
-  const { login } = useAuth();
-  const navigate = useNavigate();
-  const [error, setError] = useState('');
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+const Login = () => {
+    const { backendUrl, token, setToken } = useContext(AppContext)
+    const navigate = useNavigate()
 
-  const onSubmit = async (data) => {
-    try {
-      await login(data);
-      navigate('/');
-    } catch (err) {
-      setError(err.response?.data?.message || 'Login failed');
+    const [state, setState] = useState('Sign Up');
+    
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [name, setName] = useState('');
+
+    const onSubmitHandler = async (event) => {
+        event.preventDefault();
+
+        try {
+            if (state === 'Sign Up') {
+                const {data} = await axios.post(`${backendUrl}/api/user/register`, {name, password, email})
+                if (data.success) {
+                    localStorage.setItem('token', data.token)
+                    setToken(data.token)
+                } else {
+                    toast.error(data.message)
+                }
+            } else {
+                const {data} = await axios.post(`${backendUrl}/api/user/login`, {password, email})
+                if (data.success) {
+                    localStorage.setItem('token', data.token)
+                    setToken(data.token)
+                } else {
+                    toast.error(data.message)
+                }
+            }
+        } catch (error) {
+            toast.error(error.message)
+        }
     }
-  };
+    
+    useEffect(()=>{
+        if (token) {
+            navigate('/')
+        }
+    },[token])
+
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800 flex items-center justify-center p-4">
-      <div className="w-full max-w-md mx-auto bg-gray-800 rounded-xl shadow-2xl overflow-hidden border border-gray-700">
-        <div className="bg-gradient-to-r from-purple-600 to-blue-500 p-6 text-center">
-          <h1 className="text-3xl font-bold text-white">Welcome Back</h1>
-          <p className="text-blue-100 mt-2 opacity-90">Sign in to continue</p>
-        </div>
-        
-        <div className="p-8">
-          {error && (
-            <div className="bg-red-900/30 border-l-4 border-red-500 text-red-200 p-4 rounded mb-6 flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-              </svg>
-              {error}
-            </div>
-          )}
-          
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Email
-              </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <EnvelopeIcon className="h-5 w-5 text-gray-400" />
+    <form onSubmit={onSubmitHandler} className='min-h-[80vh] flex items-center'>
+        <div className='flex flex-col gap-3 m-auto items-center p-8 min-w-[340px] sm:min-w-96 border rounded-xl text-zinc-600 text-sm shadow-lg'>
+            <p className='text-2xl font-semibold'>{state === 'Sign Up' ? "Create Account" : "Login"}</p>
+            <p>Please {state === 'Sign Up' ? "sign up" : "login"} to Book Appointment </p>
+            {
+                state === "Sign Up" && <div className='w-full'>
+                    <p>User name</p>
+                    <input className='border border-zinc-400 rounded w-full p-2 mt-1' type="text" onChange={(e)=>setName(e.target.value)} value={name} required></input>
                 </div>
-                <input
-                  type="email"
-                  {...register('email', { required: 'Email is required' })}
-                  className="bg-gray-700 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 py-3 border-gray-600 rounded-lg placeholder-gray-400 transition duration-200"
-                  placeholder="your@email.com"
-                />
-              </div>
-              {errors.email && (
-                <p className="mt-2 text-sm text-red-400 flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {errors.email.message}
-                </p>
-              )}
+            }
+            <div className='w-full'>
+                <p>Email</p>
+                <input className='border border-zinc-400 rounded w-full p-2 mt-1' type="email" onChange={(e)=>setEmail(e.target.value)} value={email} required></input>
             </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                Password
-              </label>
-              <div className="relative rounded-lg shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <LockClosedIcon className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  {...register('password', { required: 'Password is required' })}
-                  className="bg-gray-700 text-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 py-3 border-gray-600 rounded-lg placeholder-gray-400 transition duration-200"
-                  placeholder="••••••••"
-                />
-              </div>
-              {errors.password && (
-                <p className="mt-2 text-sm text-red-400 flex items-center">
-                  <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                  {errors.password.message}
-                </p>
-              )}
+            <div className='w-full'>
+                <p>Password</p>
+                <input className='border border-zinc-400 rounded w-full p-2 mt-1' type="password" onChange={(e)=>setPassword(e.target.value)} value={password} required></input>
             </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  className="h-4 w-4 text-blue-500 focus:ring-blue-600 border-gray-500 rounded bg-gray-700"
-                />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-300">
-                  Remember me
-                </label>
-              </div>
-              <div className="text-sm">
-                <a href="#" className="font-medium text-blue-400 hover:text-blue-300 transition duration-150">
-                  Forgot password?
-                </a>
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-500 hover:to-blue-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition duration-200"
-            >
-              Sign in
-            </button>
-          </form>
-          
-          <div className="mt-8">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-600"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-gray-800 text-gray-400">
-                  New to our platform?
-                </span>
-              </div>
-            </div>
-            
-            <div className="mt-6">
-              <a
-                href="/register"
-                className="w-full flex justify-center py-2.5 px-4 border border-gray-600 rounded-lg shadow-sm text-sm font-medium text-gray-200 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition duration-200"
-              >
-                Create an account
-              </a>
-            </div>
-          </div>
+            <button type='submit' className='bg-primary text-white w-full py-2 rounded-md text-base'>{state === 'Sign Up' ? "Create Account" : "Login"}</button>
+            {
+                state === "Sign Up" 
+                ? <p >Already have an account? <span onClick={()=>setState('Login')} className='text-primary underline cursor-pointer'>Login</span></p>
+                : <p>Create a new account? <span onClick={()=>setState('Sign Up')} className='text-primary underline cursor-pointer'>Click here</span></p>
+            }
         </div>
-      </div>
-    </div>
-  );
+    </form>
+  )
 }
+
+export default Login
