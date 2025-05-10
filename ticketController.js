@@ -52,7 +52,7 @@ const getTickets = async (req, res) => {
     }
   };
 
-// Respond to Ticket (Admin,Manager)
+// Respond to Ticket (Admin)
 const respondToTicket = async (req, res) => {
     try {
       const ticket = await ticketModel.findById(req.params.id);
@@ -117,7 +117,8 @@ const resolveTicket = async (req, res) => {
     }
   };
 
-// Get My Tickets (User)
+  
+
   const getMyTickets = async (req, res) => {
     try {
       const tickets = await ticketModel.find({ user: req.user._id }).sort({ createdAt: -1 });
@@ -147,4 +148,4 @@ const resolveTicket = async (req, res) => {
     }
   };
 
-export { createTicket, getTickets, respondToTicket, resolveTicket, getMyTickets, getTicket };
+export { createTicket, getTickets, respondToTicket, resolveTicket, getMyTickets, getTicket };       
