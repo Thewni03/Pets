@@ -2,17 +2,14 @@ import React, { useContext, useEffect, useState } from 'react';
 import { AppContext } from '../context/AppContext';
 import axios from 'axios';
 import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { Search } from "lucide-react";
+
 const MyAppointments = () => {
     const { backendUrl, token, getDoctorsData } = useContext(AppContext);
     const [appointments, setAppointments] = useState([]);
-    const [payhereReady, setPayhereReady] = useState(false);
-    const [scriptLoadError, setScriptLoadError] = useState(false);
-    // const [loadingPayment, setLoadingPayment] = useState(false);
-    // const [payhereLoaded, setPayhereLoaded] = useState(false);
-
+    const [payhereLoaded, setPayhereLoaded] = useState(false);
+    const [searchTerm, setSearchTerm] = useState("");
     const months = ["", "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"]
-    const navigate = useNavigate();
 
     const slotDataFormat = (slotDate) => {
         const dateArray = slotDate.split('_')
@@ -71,122 +68,111 @@ const MyAppointments = () => {
         }
     }
 
-   
-    const handlePayHerePayment = async (appointment) => {
-        const { userData, docData, _id } = appointment;
-        if (!payhereReady) {
-            toast.error('Payment system is still initializing. Please wait...');
+    // Load PayHere script when component mounts
+    useEffect(() => {
+        // Check if already loaded
+        if (window.payhere && typeof window.payhere.startPayment === 'function') {
+            setPayhereLoaded(true);
             return;
-          }
+        }
+
+        const script = document.createElement('script');
+        script.src = 'https://www.payhere.lk/lib/payhere.js';
+        script.async = true;
+
+        script.onload = () => {
+            // Initialize PayHere with all required methods
+            window.payhere = window.payhere || {};
+            window.payhere.onCompleted = function (orderId) {
+                console.log("Payment completed. OrderID:" + orderId);
+                // Handle successful payment
+            };
+
+            window.payhere.onDismissed = function () {
+                console.log("Payment dismissed");
+                // Handle cancelled payment
+            };
+
+            window.payhere.onError = function (error) {
+                console.log("Error:" + error);
+                // Handle payment error
+            };
+
+            // Ensure startPayment exists
+            if (!window.payhere.startPayment) {
+                window.payhere.startPayment = function (payment) {
+                    console.log("PayHere payment would start with:", payment);
+                    // Fallback implementation if needed
+                };
+            }
+
+            setPayhereLoaded(true);
+        };
+
+        script.onerror = () => {
+            console.error("Failed to load PayHere script");
+            setPayhereLoaded(false);
+        };
+
+        document.body.appendChild(script);
+
+        return () => {
+            // Cleanup
+            document.body.removeChild(script);
+        };
+    }, []);
+
+    const initPayHerePayment = (paymentData) => {
+        if (!payhereLoaded || !window.payhere?.startPayment) {
+            console.error("PayHere not ready");
+            return;
+        }
+
         try {
-             // Validate required data
-            if (!docData?.fees || isNaN(docData.fees)) {
-                throw new Error('Invalid fee amount');
-            }
-            // Convert fee to number and format
-            const amount = parseFloat(docData.fees).toFixed(2);
-            if (isNaN(amount)) {
-                throw new Error('Invalid fee amount');
-              }
-
-             //First get the hash from backend
-            const { data } = await axios.post(`${backendUrl}/api/payhere/generate-hash`, {
-                merchant_id: "1230311",
-                order_id: _id,
-                amount: amount,
-                currency: 'LKR'
-            }, { headers: { token } });
-
-            if (!data?.hash) {
-                throw new Error('Failed to generate payment hash');
-            }
-            const payment = {
-                sandbox: true,
-                merchant_id: "1230311",
-                return_url: `${window.location.origin}/payment-success`,
-                cancel_url: `${window.location.origin}/payment-cancel`,
-                notify_url: `${backendUrl}/api/payhere/callback`,
-        
-                order_id: _id,
-                items: `${docData.name} - ${docData.speciality}`,
-                amount: amount, // Replace with actual appointment cost if applicable
-                currency: "LKR",
-                hash: data.hash,
-                first_name: userData?.firstName || "John",
-                last_name: userData?.lastName || "Doe",
-                email: userData?.email || "john@example.com",
-                phone: userData?.phone || "0771234567",
-                address: "No.1, Galle Road",
-                city: "Colombo",
-                country: "Sri Lanka",
+            window.payhere.startPayment({
+                sandbox: import.meta.env.VITE_PAYHERE_SANDBOX === 'true',
+                merchant_id: import.meta.env.VITE_PAYHERE_MERCHANT_ID,
+                ...paymentData,
+                return_url: undefined,
+                cancel_url: undefined,
+                notify_url: import.meta.env.VITE_PAYHERE_NOTIFY_URL
+            });
+            window.payhere.onCompleted = function (orderId) {
+                toast.success("Payment completed!");
+                fetchAppointments(); // Refresh the appointments list
             };
-            // window.payhere.onCompleted = () => {
-            //     toast.success('Payment completed successfully');
-            //     fetchAppointments(); // Refresh appointments
-            // };
-
-            // window.payhere.onDismissed = () => {
-            //     toast.info('Payment was cancelled');
-            // };
-
-            // window.payhere.onError = (error) => {
-            //     toast.error(`Payment error: ${error}`);
-            // };
-            // 4. Set callbacks
-            window.payhere.onCompleted = (orderId) => {
-                navigate('/payment-success');
-            };
-        
-            window.payhere.onDismissed = () => {
-                navigate('/payment-cancel');
-            };
-        
-            window.payhere.onError = (error) => {
-                toast.error(`Payment error: ${error}`);
-            };
-            console.log('Payment data being sent:', payment);
-            window.payhere.startPayment(payment);
-        } catch (err) {
-            console.error('Payment initiation failed:', err);
-            toast.error(err.response?.data?.error || err.response?.data?.message || err.message || 'Failed to initiate payment');
+        } catch (error) {
+            console.error("Payment error:", error);
         }
     };
-    // const handlePayHerePayment = (appointment) => {
-    //     const payment = {
-    //         merchant_id: '1230311', // Replace with your actual PayHere sandbox Merchant ID
-    //         return_url: 'http://localhost:3000/payment-success', // Or your frontend route
-    //         cancel_url: 'http://localhost:3000/payment-cancel',
-    //         notify_url: `${backendUrl}/api/payhere/notify`, // Your backend route to receive PayHere server notifications
-    
-    //         order_id: appointment._id,
-    //         items: `Consultation with ${appointment.docData.name}`,
-    //         amount: appointment.docData.fees || '1000.00', // Ensure this is a number or string
-    //         currency: 'LKR',
-    //         first_name: appointment.userData?.name?.split(' ')[0] || 'First',
-    //         last_name: appointment.userData?.name?.split(' ')[1] || 'Last',
-    //         email: appointment.userData?.email || 'demo@payhere.lk',
-    //         phone: appointment.userData?.phone || '0771234567',
-    //         address: 'No.1, Galle Road, Colombo',
-    //         city: 'Colombo',
-    //         country: 'Sri Lanka'
-    //     };
-    
-    //     // Create form and submit
-    //     const form = document.createElement('form');
-    //     form.method = 'POST';
-    //     form.action = 'https://sandbox.payhere.lk/pay/checkout';
-        
-    //     Object.entries(payment).forEach(([key, value]) => {
-    //         const input = document.createElement('input');
-    //         input.type = 'hidden';
-    //         input.name = key;
-    //         input.value = value;
-    //         form.appendChild(input);
-    //     });
-    
-    //     document.body.appendChild(form);
-    //     form.submit();
-    // };
+
+    const appointmentPayHere = async (appointmentId) => {
+        if (!payhereLoaded) {
+            console.error("PayHere SDK not loaded yet");
+            return;
+        }
+
+        try {
+            const { data } = await axios.post(
+                `${backendUrl}/api/user/payment-payhere`,
+                { appointmentId },
+                { headers: { token } }
+            );
+
+            if (data.success) {
+                initPayHerePayment(data.paymentData);
+            }
+        } catch (error) {
+            console.error("Payment error:", error);
+        }
+    };
+
+    const filteredAppointments = appointments.filter(a =>
+        a.docData.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        a.docData.speciality.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+
 
     useEffect(() => {
         if (token) {
@@ -194,67 +180,33 @@ const MyAppointments = () => {
         }
     }, [token]);
 
-    // useEffect(() => {
-    //     if (!window.payhere) {
-    //       const script = document.createElement("script");
-    //       script.src = "https://sandbox.payhere.lk/lib/payhere.js";
-    //       script.async = true;
-    //       script.onload = () => {
-    //         window.payhere.setup("1230311", "sandbox"); // Use your sandbox merchant ID
-    //       };
-    //       document.body.appendChild(script);
-    //     }
-    //   }, []);
-
-    useEffect(() => {
-        // Skip if already loaded or previously failed
-        if (window.payhere || scriptLoadError) return;
-      
-        const script = document.createElement("script");
-        script.src = "https://sandbox.payhere.lk/lib/payhere.js";
-        script.async = true;
-        
-        script.onload = () => {
-          if (typeof window.payhere !== 'undefined') {
-            // Initialize with empty callbacks
-            window.payhere.onCompleted = () => {};
-            window.payhere.onDismissed = () => {};
-            window.payhere.onError = () => {};
-            setPayhereReady(true);
-          } else {
-            console.error('PayHere object not created');
-            setScriptLoadError(true);
-            toast.error('Payment system failed to initialize');
-          }
-        };
-      
-        script.onerror = () => {
-          console.error('Script load failed');
-          setScriptLoadError(true);
-          toast.error('Failed to load payment system. Please refresh the page.');
-        };
-      
-        document.body.appendChild(script);
-      
-        return () => {
-          // Cleanup
-          if (script.parentNode) {
-            document.body.removeChild(script);
-          }
-        };
-      }, [scriptLoadError]);
-
     return (
         <div>
-            {scriptLoadError && (
-                <div className="bg-red-100 text-red-700 p-3 mb-4 rounded">
-                    Payment system unavailable. Please refresh the page.
-                </div>
-                )}
             <p className='pb-3 mt-12 font-medium text-zinc-700 border-b'>My appointments</p>
+            <div className="flex justify-center my-4 gap-4 flex-wrap">
+                <div className="relative w-full max-w-md">
+                    <input
+                        type="text"
+                        placeholder="Search by doctor or speciality"
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 rounded-full border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                    />
+                    <Search className="absolute left-3 top-2.5 text-gray-400" size={18} />
+                </div>
+                {searchTerm && (
+                    <button
+                        onClick={() => setSearchTerm("")}
+                        className="px-4 py-2 text-sm bg-red-100 text-red-500 rounded-full hover:bg-red-500 hover:text-white transition duration-300"
+                    >
+                        Clear Search
+                    </button>
+                )}
+            </div>
+
             <div>
-                {appointments.length > 0 ? (
-                    appointments.map((appointment, index) => (
+                {filteredAppointments.length > 0 ? (
+                    filteredAppointments.map((appointment, index) => (
                         <div key={index} className='grid grid-cols-[1fr_2fr] gap-4 sm:flex sm:gap-6 py-2 border-b'>
                             <div>
                                 <img className='w-32 bg-indigo-50' src={appointment.docData.image} alt="" />
@@ -265,33 +217,15 @@ const MyAppointments = () => {
                                 <p className='text-zinc-700 font-medium mt-2'>Date & Time: <span className='text-zinc-600 font-normal ml-1'>{slotDataFormat(appointment.slotDate)} | {appointment.slotTime}</span> </p>
                             </div>
                             <div className='flex flex-col gap-2 justify-center'>
-                                {/* <button 
-                                    onClick={() => handlePayHerePayment(appointment)} 
-                                    disabled={!payhereReady || loadingPayment || appointment.canceled}
-                                    className={`text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded transition-all duration-300 ${
-                                        !payhereReady || loadingPayment ? 'opacity-50 cursor-not-allowed' : 
-                                        'hover:bg-green-400 hover:text-white'
-                                    }`}
-                                >
-                                    {loadingPayment ? 'Processing...' : 'Pay Online'}
-                                </button> */}
-                                {!appointment.canceled && <button onClick={() => handlePayHerePayment(appointment)} className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-green-400 hover:text-white transition-all duration-300'>Pay Online</button>}
-                                {/* {!appointment.canceled && (
-                                <button 
-                                    onClick={() => handlePayHerePayment(appointment)}
-                                    disabled={!payhereReady || scriptLoadError}
-                                    className={`pay-button ${!payhereReady ? 'opacity-50' : ''}`}
-                                >
-                                    {payhereReady ? 'Pay Online' : 'Loading Payment...'}
-                                </button>
-                                )} */}
-                                {!appointment.canceled && <button onClick={() => cancelAppointment(appointment._id)}  className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-500 hover:text-white transition-all duration-300'>Cancel Appointment</button>}
+                                {!appointment.canceled && appointment.payment && <button className='sm:min-w-48 py-2 border rounded text-blue-100 bg-green-400'>Paid</button>}
+                                {!appointment.canceled && !appointment.payment && <button onClick={() => appointmentPayHere(appointment._id)} className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-green-400 hover:text-white transition-all duration-300'>Pay Online</button>}
+                                {!appointment.canceled && <button onClick={() => cancelAppointment(appointment._id)} className='text-sm text-stone-500 text-center sm:min-w-48 py-2 border rounded hover:bg-red-500 hover:text-white transition-all duration-300'>Cancel Appointment</button>}
                                 {appointment.canceled && <button className='sm:min-w-48 py-2 border rounded border-red-500 text-red-500'>Appointment cancelled</button>}
                             </div>
                         </div>
                     ))
                 ) : (
-                    <p className='text-gray-500 mt-6'>No appointments booked.</p>
+                    <p className='text-gray-500 mt-6'>{appointments.length > 0 ? "No results found." : "No appointments booked."}</p>
                 )}
             </div>
         </div>

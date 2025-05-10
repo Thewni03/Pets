@@ -14,8 +14,13 @@ import Footer from './components/Footer';
 import { ToastContainer } from 'react-toastify';
 import SuccessPage from './pages/SuccessPage';
 import ErrorPage from './pages/ErrorPage';
-import PaymentSuccess from './pages/PaymentSuccess';
-import PaymentCancel from './pages/PaymentCancel';
+import PetHome from './pages/lak/PetHome';
+import AddUser from './pages/lak/AddUser';
+import Users from './pages/lak/Users';
+import UpdateUser from './pages/lak/UpdateUser';
+//import Imguploader from './pages/lak/ImgUploader';
+import Imgupload from './pages/lak/ImgUpload';
+import TicketDashboard from './pages/ticket/TicketDashboard';
 
 const App = () => {
   return (
@@ -34,8 +39,12 @@ const App = () => {
         <Route path="/success" element={<SuccessPage />} />
         <Route path="/error" element={<ErrorPage />} />
         <Route path='/appointment/:docId' element={<Appointment />} />
-        <Route path="/payment-success" element={<PaymentSuccess />} />
-        <Route path="/payment-cancel" element={<PaymentCancel />} />
+        <Route path='/pet-home' element={<PetHome />} />
+        <Route path="/petvacdetails" element={<AddUser />} />
+        <Route path="/petdetails" element={<Users />} />
+        <Route path="/petdetails/:petId" element={<UpdateUser />} />
+        <Route path="/imgpart" element={<Imgupload />} />
+        <Route path='/tickets' element={<TicketDashboard />} />
       </Routes>
       <Footer />
     </div>

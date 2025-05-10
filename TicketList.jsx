@@ -1,11 +1,9 @@
 import { useEffect, useState } from 'react';
 import ticketService from '../../api/tickets';
-import { useAuth } from '../../context/AuthContext';
 import { Link } from 'react-router-dom';
 import React from 'react';
 
 export default function TicketList() {
-  const { user } = useAuth();
   const [tickets, setTickets] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
@@ -13,7 +11,7 @@ export default function TicketList() {
   useEffect(() => {
     const fetchTickets = async () => {
       try {
-        const response = await ticketService.getTickets(user.token);
+        const response = await ticketService.getTickets();
         setTickets(response.data);
       } catch (err) {
         setError(err.response?.data?.message || 'Failed to fetch tickets');
@@ -23,7 +21,7 @@ export default function TicketList() {
     };
 
     fetchTickets();
-  }, [user.token]);
+  }, []);
 
   if (isLoading) {
     return <div className="text-center py-8">Loading tickets...</div>;

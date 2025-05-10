@@ -26,11 +26,13 @@ const AppContextProvider = (props) => {
         vaccinated: '',
         medicalHistory: []
     })
+    const [tickets, setTickets] = useState([]);
     
+
     const getDoctorsData = async () => {
         try {
-            const {data} = await axios.get(`${backendUrl}/api/doctor/list`)
-            if(data.success){
+            const { data } = await axios.get(`${backendUrl}/api/doctor/list`)
+            if (data.success) {
                 setDoctors(data.doctors)
                 console.log("Fetched Doctors:", data.doctors);
             } else {
@@ -44,10 +46,10 @@ const AppContextProvider = (props) => {
 
     const loadUserProfileData = async () => {
         try {
-            const {data} = await axios.get(`${backendUrl}/api/user/get-profile`, {headers:{token}})
-            if(data.success){
+            const { data } = await axios.get(`${backendUrl}/api/user/get-profile`, { headers: { token } })
+            if (data.success) {
                 setUserData(data.userData)
-            } else{
+            } else {
                 toast.error(data.message)
             }
         } catch (error) {
@@ -120,7 +122,7 @@ const AppContextProvider = (props) => {
             toast.error("Failed to delete pet");
         }
     }
-    
+
     // Update user profile
     const updateUserProfileData = async () => {
         try {
@@ -132,11 +134,11 @@ const AppContextProvider = (props) => {
                 gender: userData.gender,
                 pets: userData.pets || []
             }
-    
+
             console.log("Sending Data:", formData); // Debugging log
-    
+
             const { data } = await axios.post(`${backendUrl}/api/user/update-profile`, formData, { headers: { token } })
-    
+
             if (data.success) {
                 toast.success(data.message)
                 await loadUserProfileData()
@@ -149,38 +151,66 @@ const AppContextProvider = (props) => {
         }
     }
 
-    const value = {
-        doctors, getDoctorsData,
-        currencySymbol,
-        token, setToken,
-        backendUrl,
-        userData,setUserData,
-        loadUserProfileData,
-        updateUserProfileData,
-        pets, getPetsData,
-        addOrEditPet,
-        deletePet,
-        openModal,
-        closeModal,
-        isModalOpen,
-        isEditing,
-        petData,
-        setPetData
-    }
+    // Add these to your existing context
+    
 
-    useEffect(()=>{
-        getDoctorsData()
-        if (token) {
-            loadUserProfileData();
-            getPetsData();
+    const fetchTickets = async () => {
+        try {
+            const response = await axios.get(`${backendUrl}/api/tickets`, { headers: { token } });
+            setTickets(Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+            console.error('Error fetching tickets:', error);
+            setTickets([]); 
         }
-    },[token])
+    };
 
-    return(
-        <AppContext.Provider value={value}>
-            {props.children}
-        </AppContext.Provider>
-    )
+    const createTicket = async (ticketData) => {
+        try {
+            const response = await axios.post('/api/tickets', ticketData, { headers: { token } });
+            setTickets(prev => [response.data, ...prev]);
+            return response.data;
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Failed to create ticket');
+        }
+    };
+
+
+
+const value = {
+    doctors, getDoctorsData,
+    currencySymbol,
+    token, setToken,
+    backendUrl,
+    userData, setUserData,
+    loadUserProfileData,
+    updateUserProfileData,
+    pets, getPetsData,
+    addOrEditPet,
+    deletePet,
+    openModal,
+    closeModal,
+    isModalOpen,
+    isEditing,
+    petData,
+    setPetData,
+    fetchTickets,
+    createTicket,
+    tickets
+}
+
+useEffect(() => {
+    getDoctorsData()
+    if (token) {
+        loadUserProfileData();
+        getPetsData();
+    }
+}, [token])
+
+return (
+    <AppContext.Provider value={value}>
+        {props.children}
+    </AppContext.Provider>
+)
 }
 
 export default AppContextProvider

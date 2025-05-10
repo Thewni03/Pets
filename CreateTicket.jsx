@@ -1,12 +1,10 @@
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import ticketService from '../../api/tickets';
-import { useAuth } from '../../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import React from 'react';
 
 export default function CreateTicket() {
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -19,7 +17,7 @@ export default function CreateTicket() {
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      await ticketService.createTicket(data, user.token);
+      await ticketService.createTicket(data);
       navigate('/');
     } catch (err) {
       setError(err.response?.data?.message || 'Failed to create ticket');

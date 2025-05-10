@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ticketService from '../../api/tickets';
-import { useAuth } from '../../context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 
 export default function TicketDetail() {
   const { id } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -24,35 +22,25 @@ export default function TicketDetail() {
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        const ticketData = await ticketService.getTicket(id, user.token);
-        
-        // Check if user has permission to view this ticket
-        if (user.user.role !== 'admin' && ticketData.user._id !== user.user.id) {
-          navigate('/');
-          return;
-        }
-        
+        const ticketData = await ticketService.getTicket(id);
         setTicket(ticketData);
       } catch (err) {
         setError(err.message || 'Failed to fetch ticket');
-        if (err.message.includes('Not authorized') || err.response?.status === 403) {
-          navigate('/');
-        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchTicket();
-  }, [id, user.token, user.user.id, user.user.role, navigate]);
+  }, [id]);
 
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      await ticketService.respondToTicket(id, data.message, user.token);
+      await ticketService.respondToTicket(id, data.message);
       
       // Refresh ticket data
-      const response = await ticketService.getTicket(id, user.token);
+      const response = await ticketService.getTicket(id);
       setTicket(response);
       reset({ message: '' });
     } catch (err) {
@@ -65,10 +53,10 @@ export default function TicketDetail() {
   const handleResolve = async () => {
     try {
       setIsSubmitting(true);
-      await ticketService.resolveTicket(id, user.token);
+      await ticketService.resolveTicket(id);
       
       // Refresh ticket data
-      const response = await ticketService.getTicket(id, user.token);
+      const response = await ticketService.getTicket(id);
       setTicket(response);
     } catch (err) {
       setError(err.message || 'Failed to resolve ticket');
@@ -107,7 +95,7 @@ export default function TicketDetail() {
         className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4"
       >
         <ArrowLeftIcon className="h-5 w-5 mr-1" />
-        Back to {user.user.role === 'admin' ? 'Tickets' : 'Dashboard'}
+        Back to Tickets
       </button>
 
       <div className="mb-6">
@@ -161,9 +149,7 @@ export default function TicketDetail() {
 
       {ticket.status !== 'resolved' && (
         <div className="mt-8">
-          <h3 className="text-lg font-medium mb-3">
-            {user.user.role === 'admin' ? 'Add Response' : 'Add Comment'}
-          </h3>
+          <h3 className="text-lg font-medium mb-3">Add Response</h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <textarea
@@ -172,11 +158,7 @@ export default function TicketDetail() {
                   required: 'Message is required',
                 })}
                 className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder={
-                  user.user.role === 'admin' 
-                    ? 'Type your response here...' 
-                    : 'Add additional comments about your issue...'
-                }
+                placeholder="Type your response here..."
               />
               {errors.message && (
                 <p className="mt-1 text-sm text-red-600">
@@ -192,16 +174,14 @@ export default function TicketDetail() {
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
-              {user.user.role === 'admin' && (
-                <button
-                  type="button"
-                  onClick={handleResolve}
-                  disabled={isSubmitting}
-                  className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  {isSubmitting ? 'Processing...' : 'Mark as Resolved'}
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={handleResolve}
+                disabled={isSubmitting}
+                className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isSubmitting ? 'Processing...' : 'Mark as Resolved'}
+              </button>
             </div>
           </form>
         </div>
