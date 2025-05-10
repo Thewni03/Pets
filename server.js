@@ -1,43 +1,35 @@
-import express from 'express'
-import cors from 'cors'
-import 'dotenv/config'
-import connectDB from './config/mongodb.js'
-import connectCloudinary from './config/cloudinary.js'
-import crypto from 'crypto'
-import adminRouter from './routes/adminRoute.js'
-// import path, { dirname }  from 'path'
-// import { fileURLToPath } from 'url';
-import doctorRouter from './routes/doctorRoute.js'
-import userRouter from './routes/userRoute.js'
-import petRouter from './routes/petRoute.js'
-import payhereRouter from './routes/payhereRoute.js'
-import paymentRoutes from './routes/paymentRoutes.js';
+import dotenv from 'dotenv'
+dotenv.config()
+import express from 'express';
+import cors from 'cors';
+import connectDB from './config/db.js';
+import userRouter from './routes/userRoutes.js';
+import ticketrouter from './routes/ticketRoutes.js';
 
 
-//app config
-const app = express()
-//const __dirname = dirname(fileURLToPath(import.meta.url));
-//app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-const port = process.env.PORT || 4000
-connectDB()
-connectCloudinary()
+const app = express();
 
-//middleware
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }));
-app.use(cors())
+// Middleware
+app.use(cors({
+  origin: ['http://localhost:5175', 'http://localhost:5174'], // frontend URL
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true
+})); // CORS
 
-//API endpoints
-app.use('/api/admin', adminRouter) //localhost:4000/api/admin/add-doctor
-app.use('/api/doctor', doctorRouter)
+app.use(express.json()); 
+
+//connect db
+connectDB();
+
+//call the user models: router -> controller -> models
 app.use('/api/user', userRouter)
-app.use('/api/pet', petRouter)
-app.use('/api/payhere', payhereRouter)
-app.use('/api', paymentRoutes);
+app.use('/api/tickets', ticketrouter)
 
 
-app.get('/',(req,res)=>{
-    res.send('API working')
-})
+//start server
+const PORT = process.env.PORT || 5001;
 
-app.listen(port, ()=>console.log('Server started',port))
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}` );
+});

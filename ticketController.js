@@ -52,7 +52,7 @@ const getTickets = async (req, res) => {
     }
   };
 
-// Respond to Ticket (Admin)
+// Respond to Ticket (Admin,Manager)
 const respondToTicket = async (req, res) => {
     try {
       const ticket = await ticketModel.findById(req.params.id);
@@ -117,8 +117,7 @@ const resolveTicket = async (req, res) => {
     }
   };
 
-  
-
+// Get My Tickets (User)
   const getMyTickets = async (req, res) => {
     try {
       const tickets = await ticketModel.find({ user: req.user._id }).sort({ createdAt: -1 });
