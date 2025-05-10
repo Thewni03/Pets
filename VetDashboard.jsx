@@ -1,33 +1,34 @@
 import React, { useContext, useEffect } from 'react'
-import { AdminContext } from '../../context/AdminContext'
-import { CalendarRange, UsersRound, ContactRound, ClipboardList } from 'lucide-react'
+import { DoctorContext } from '../../context/DoctorContext'
+import { CalendarRange, UsersRound, ClipboardList, HandCoins } from 'lucide-react'
 import { AppContext } from '../../context/AppContext'
 
-const Dashboard = () => {
+const VetDashboard = () => {
 
-  const { aToken, dashData, getDashData } = useContext(AdminContext)
-  const { slotDataFormat } = useContext(AppContext)
+  const { dToken, dashData, getDashData } = useContext(DoctorContext)
+  const { currency, slotDataFormat } = useContext(AppContext)
 
   useEffect(() => {
-    if (aToken) {
+    if (dToken) {
       getDashData()
     }
-  }, [aToken])
+  }, [dToken])
 
   return dashData && (
-    <div className='m-5'>
-      <div className='flex flex-wrap gap-3'>
-        {/* Doctors Card */}
-        <div className='flex items-center gap-5 bg-white p-4 min-w-52 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all'>
-          <UsersRound className="w-15 h-15 p-3 bg-blue-100 text-blue-600 rounded-full" />
+    <div className='m-5 px-10 w-3xl'>
+      <h2 className='text-2xl font-semibold text-gray-800'>Vet dashboard</h2>
+      <div className='flex flex-wrap gap-3 w-3xl py-6'>
+        {/* Earnings Card */}
+        <div className='flex items-center gap-4 bg-white p-4 min-w-52 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all mr-4'>
+          <HandCoins className="w-15 h-15 p-3 bg-blue-100 text-blue-600 rounded-full" />
           <div>
-            <p className='text-xl font-semibold text-gray-700'>{dashData.doctors}</p>
-            <p className='text-sm text-gray-500'>Doctors</p>
+            <p className='text-xl font-semibold text-gray-700'>{currency}.{dashData.earnings}</p>
+            <p className='text-sm text-gray-500'>Earnings</p>
           </div>
         </div>
 
         {/* Appointments Card */}
-        <div className='flex items-center gap-5 bg-white p-4 min-w-52 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all'>
+        <div className='flex items-center gap-4 bg-white p-4 min-w-52 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all mr-4'>
           <CalendarRange className="w-15 h-15 p-3 bg-green-100 text-green-600 rounded-full" />
           <div>
             <p className='text-xl font-semibold text-gray-700'>{dashData.appointments}</p>
@@ -36,10 +37,10 @@ const Dashboard = () => {
         </div>
 
         {/* Pet Owners Card */}
-        <div className='flex items-center gap-5 bg-white p-4 min-w-52 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all'>
-          <ContactRound className="w-15 h-15 p-3 bg-purple-100 text-purple-600 rounded-full" />
+        <div className='flex items-center gap-4 bg-white p-4 min-w-52 rounded border-2 border-gray-200 cursor-pointer hover:scale-105 transition-all'>
+          <UsersRound className="w-15 h-15 p-3 bg-purple-100 text-purple-600 rounded-full" />
           <div>
-            <p className='text-xl font-semibold text-gray-700'>{dashData.users}</p>
+            <p className='text-xl font-semibold text-gray-700'>{dashData.petOwners}</p>
             <p className='text-sm text-gray-500'>Pet Owners</p>
           </div>
         </div>
@@ -69,10 +70,10 @@ const Dashboard = () => {
                   </p>
                   <div className="flex items-center gap-2">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.canceled
-                        ? 'bg-red-100 text-red-800'
-                        : item.isCompleted
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-blue-100 text-blue-800'
+                      ? 'bg-red-100 text-red-800'
+                      : item.isCompleted
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-blue-100 text-blue-800'
                       }`}>
                       {item.canceled ? 'Cancelled' : item.isCompleted ? 'Completed' : 'Upcoming'}
                     </span>
@@ -91,4 +92,4 @@ const Dashboard = () => {
   )
 }
 
-export default Dashboard
+export default VetDashboard
