@@ -27,64 +27,96 @@ export default function CreateTicket() {
   };
 
   return (
-    <div className="max-w-2xl mx-auto mt-10 bg-white p-8 rounded-lg shadow">
-      <h1 className="text-2xl font-bold mb-6">Create New Ticket</h1>
-      {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-          {error}
-        </div>
-      )}
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Subject
-          </label>
-          <input
-            type="text"
-            {...register('subject', {
-              required: 'Subject is required',
-              minLength: {
-                value: 5,
-                message: 'Subject must be at least 5 characters',
-              },
-            })}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            placeholder="Brief description of your issue"
-          />
-          {errors.subject && (
-            <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
-          )}
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-indigo-50 to-blue-50 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-lg p-8">
+        <h1 className="text-3xl font-bold text-gray-800 mb-6 text-center">
+          Create Support Ticket
+        </h1>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Message
-          </label>
-          <textarea
-            rows={5}
-            {...register('message', {
-              required: 'Message is required',
-              minLength: {
-                value: 10,
-                message: 'Message must be at least 10 characters',
-              },
-            })}
-            className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-            placeholder="Detailed description of your issue"
-          />
-          {errors.message && (
-            <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
-          )}
-        </div>
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
+            {error}
+          </div>
+        )}
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
-        </button>
-      </form>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Subject
+            </label>
+            <input
+              type="text"
+              {...register('subject', {
+                required: 'Subject is required',
+                minLength: {
+                  value: 5,
+                  message: 'Subject must be at least 5 characters',
+                },
+              })}
+              placeholder="Brief description of your issue"
+              className="w-full px-4 py-2 border rounded-lg shadow-sm border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+            />
+            {errors.subject && (
+              <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
+            )}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Message
+            </label>
+            <textarea
+              rows={5}
+              {...register('message', {
+                required: 'Message is required',
+                minLength: {
+                  value: 10,
+                  message: 'Message must be at least 10 characters',
+                },
+              })}
+              placeholder="Detailed description of your issue"
+              className="w-full px-4 py-2 border rounded-lg shadow-sm border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:outline-none transition"
+            />
+            {errors.message && (
+              <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
+            )}
+          </div>
+
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="w-full flex justify-center items-center px-4 py-2 font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition shadow focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {isSubmitting ? (
+              <>
+                <svg
+                  className="animate-spin h-5 w-5 mr-2 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+                Submitting...
+              </>
+            ) : (
+              'Submit Ticket'
+            )}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

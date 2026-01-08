@@ -148,4 +148,4 @@ const resolveTicket = async (req, res) => {
     }
   };
 
-export { createTicket, getTickets, respondToTicket, resolveTicket, getMyTickets, getTicket };
+export { createTicket, getTickets, respondToTicket, resolveTicket, getMyTickets, getTicket };       

@@ -22,7 +22,13 @@ export default function TicketDetail() {
   useEffect(() => {
     const fetchTicket = async () => {
       try {
-        const ticketData = await ticketService.getTicket(id);
+        const ticketData = await ticketService.getTicket(id, user.token);
+
+        if (user.user.role !== 'admin' && ticketData.user._id !== user.user.id) {
+          navigate('/');
+          return;
+        }
+
         setTicket(ticketData);
       } catch (err) {
         setError(err.message || 'Failed to fetch ticket');
@@ -37,10 +43,8 @@ export default function TicketDetail() {
   const onSubmit = async (data) => {
     try {
       setIsSubmitting(true);
-      await ticketService.respondToTicket(id, data.message);
-      
-      // Refresh ticket data
-      const response = await ticketService.getTicket(id);
+      await ticketService.respondToTicket(id, data.message, user.token);
+      const response = await ticketService.getTicket(id, user.token);
       setTicket(response);
       reset({ message: '' });
     } catch (err) {
@@ -57,6 +61,8 @@ export default function TicketDetail() {
       
       // Refresh ticket data
       const response = await ticketService.getTicket(id);
+      await ticketService.resolveTicket(id, user.token);
+      const response = await ticketService.getTicket(id, user.token);
       setTicket(response);
     } catch (err) {
       setError(err.message || 'Failed to resolve ticket');
@@ -65,18 +71,16 @@ export default function TicketDetail() {
     }
   };
 
-  if (isLoading) {
-    return <div className="text-center py-8">Loading ticket...</div>;
-  }
+  if (isLoading) return <div className="text-center py-12 text-gray-600">Loading ticket...</div>;
 
   if (error) {
     return (
       <div className="max-w-4xl mx-auto mt-10 p-8">
-        <button 
+        <button
           onClick={() => navigate(-1)}
           className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4"
         >
-          <ArrowLeftIcon className="h-5 w-5 mr-1" />
+          <ArrowLeftIcon className="h-5 w-5 mr-2" />
           Go Back
         </button>
         <div className="text-red-600 text-center">{error}</div>
@@ -84,37 +88,39 @@ export default function TicketDetail() {
     );
   }
 
-  if (!ticket) {
-    return <div className="text-center py-8">Ticket not found</div>;
-  }
+  if (!ticket) return <div className="text-center py-12 text-gray-600">Ticket not found</div>;
 
   return (
-    <div className="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-lg shadow">
-      <button 
+    <div className="max-w-4xl mx-auto mt-10 bg-white p-8 rounded-2xl shadow-md">
+      <button
         onClick={() => navigate(-1)}
-        className="flex items-center text-indigo-600 hover:text-indigo-800 mb-4"
+        className="flex items-center text-indigo-600 hover:text-indigo-800 mb-6"
       >
         <ArrowLeftIcon className="h-5 w-5 mr-1" />
         Back to Tickets
+        <ArrowLeftIcon className="h-5 w-5 mr-2" />
+        Back to {user.user.role === 'admin' ? 'Tickets' : 'Dashboard'}
       </button>
 
       <div className="mb-6">
         <div className="flex justify-between items-center mb-2">
-          <h1 className="text-2xl font-bold">{ticket.subject}</h1>
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-            ticket.status === 'open'
-              ? 'bg-green-100 text-green-800'
-              : ticket.status === 'in-progress'
-              ? 'bg-yellow-100 text-yellow-800'
-              : 'bg-blue-100 text-blue-800'
-          }`}>
+          <h1 className="text-3xl font-bold text-gray-800">{ticket.subject}</h1>
+          <span
+            className={`px-3 py-1 rounded-full text-sm font-medium capitalize ${
+              ticket.status === 'open'
+                ? 'bg-green-100 text-green-800'
+                : ticket.status === 'in-progress'
+                ? 'bg-yellow-100 text-yellow-800'
+                : 'bg-blue-100 text-blue-800'
+            }`}
+          >
             {ticket.status}
           </span>
         </div>
-        <p className="text-gray-600 mb-4">
-          Created by: {ticket.user?.name} ({ticket.user?.email})
+        <p className="text-gray-500 mb-4">
+          Created by <strong>{ticket.user?.name}</strong> ({ticket.user?.email})
         </p>
-        <div className="bg-gray-50 p-4 rounded-lg">
+        <div className="bg-gray-50 border border-gray-200 p-4 rounded-lg">
           <p className="text-gray-700 whitespace-pre-line">{ticket.message}</p>
         </div>
       </div>
@@ -128,19 +134,19 @@ export default function TicketDetail() {
             {ticket.responses.map((response, index) => (
               <div
                 key={index}
-                className={`p-4 rounded-lg ${
-                  response.from === 'admin' ? 'bg-blue-50' : 'bg-gray-50'
+                className={`p-4 rounded-lg border ${
+                  response.from === 'admin' ? 'bg-blue-50 border-blue-100' : 'bg-gray-50 border-gray-200'
                 }`}
               >
-                <div className="flex justify-between items-start">
-                  <p className="font-medium">
+                <div className="flex justify-between items-center">
+                  <span className="font-medium text-sm text-gray-700">
                     {response.from === 'admin' ? 'Admin' : 'User'}
-                  </p>
-                  <p className="text-sm text-gray-500">
+                  </span>
+                  <span className="text-sm text-gray-400">
                     {new Date(response.createdAt).toLocaleString()}
-                  </p>
+                  </span>
                 </div>
-                <p className="mt-2 text-gray-700 whitespace-pre-line">{response.message}</p>
+                <p className="mt-2 text-gray-800 whitespace-pre-line">{response.message}</p>
               </div>
             ))}
           </div>
@@ -150,38 +156,44 @@ export default function TicketDetail() {
       {ticket.status !== 'resolved' && (
         <div className="mt-8">
           <h3 className="text-lg font-medium mb-3">Add Response</h3>
+        <div className="mt-10">
+          <h3 className="text-lg font-medium mb-3 text-gray-800">
+            {user.user.role === 'admin' ? 'Add Response' : 'Add Comment'}
+          </h3>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <textarea
                 rows={4}
-                {...register('message', {
-                  required: 'Message is required',
-                })}
-                className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                placeholder="Type your response here..."
+                {...register('message', { required: 'Message is required' })}
+                className="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:outline-none p-3"
+                placeholder={
+                  user.user.role === 'admin'
+                    ? 'Type your response here...'
+                    : 'Add more details about your issue...'
+                }
               />
               {errors.message && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.message.message}
-                </p>
+                <p className="text-sm text-red-600 mt-1">{errors.message.message}</p>
               )}
             </div>
-            <div className="flex justify-between">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-4">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-indigo-600 text-white py-2 px-4 rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? 'Submitting...' : 'Submit'}
               </button>
-              <button
-                type="button"
-                onClick={handleResolve}
-                disabled={isSubmitting}
-                className="bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? 'Processing...' : 'Mark as Resolved'}
-              </button>
+              {user.user.role === 'admin' && (
+                <button
+                  type="button"
+                  onClick={handleResolve}
+                  disabled={isSubmitting}
+                  className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isSubmitting ? 'Processing...' : 'Mark as Resolved'}
+                </button>
+              )}
             </div>
           </form>
         </div>

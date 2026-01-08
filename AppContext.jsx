@@ -1,14 +1,8 @@
 import { createContext } from "react";
-import axios from 'axios'
-import { useState } from "react";
-import { useEffect } from "react";
-import { toast } from 'react-toastify'
 
 export const AppContext = createContext()
 
 const AppContextProvider = (props) => {
-    const currencySymbol = 'LKR';
-    const backendUrl = import.meta.env.VITE_BACKEND_URL
 
     const [doctors, setDoctors] = useState([])
     const [token, setToken] = useState(localStorage.getItem('token') || '')
@@ -211,6 +205,25 @@ return (
         {props.children}
     </AppContext.Provider>
 )
+    const currency = 'LKR'
+
+    const months = ["", "Jan", "Feb", "Mar", "Apr", "May", "June", "July", "Aug", "Sep", "Oct", "Nov", "Dec"]
+    
+      const slotDataFormat = (slotDate) => {
+        const dateArray = slotDate.split('_')
+        return dateArray[0] + " " + months[Number(dateArray[1])] + " " + dateArray[2]
+    }
+
+    const value = {
+        slotDataFormat,
+        currency
+    }
+
+    return(
+        <AppContext.Provider value={value}>
+            {props.children}
+        </AppContext.Provider>
+    )
 }
 
 export default AppContextProvider

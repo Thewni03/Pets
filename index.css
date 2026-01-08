@@ -2,30 +2,13 @@
 @import "tailwindcss";
 
 @theme {
-    --color-primary: var(--color-sky-500);
-  }
-
-@layer utilities {
-    .grid-cols-auto {
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    }
-}
-   
-
-/* .sm\:grid-cols-3 {
-    @media (width >= 40rem) {
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-    }
-} */
-
-*{
-    font-family: Outfit;
-}
-
-.active hr{
-    @apply block
+  --color-primary: var(--color-sky-500);
 }
 
 ::-webkit-scrollbar{
-    @apply hidden
+  @apply hidden
+}
+
+*{
+  font-family: Outfit;
 }
