@@ -129,24 +129,6 @@ http://localhost:5173
 
 ---
 
-## 🔐 ENVIRONMENT VARIABLES
-
-Create a `.env` file in the root directory and add:
-
-```env
-PORT=5000
-MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_secret_key
-CLOUDINARY_CLOUD_NAME=your_cloud_name
-CLOUDINARY_API_KEY=your_api_key
-CLOUDINARY_API_SECRET=your_api_secret
-PAYHERE_MERCHANT_ID=your_merchant_id
-```
-
-⚠️ **DO NOT UPLOAD `.env` FILES TO GITHUB**
-
----
-
 ## 🧪 TESTING
 
 * 🧪 API testing using **Postman**
