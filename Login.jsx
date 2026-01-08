@@ -22,6 +22,12 @@ const Login = () => {
             if (state == 'Admin') {
                 const {data} = await axios.post(backendUrl + '/api/admin/login', {email, password})
                 if (data.success) {
+                    // localStorage.setItem('token', data.token)
+                    // setToken(data.token)
+                    setState('Login')
+                    setEmail('')
+                    setPassword('')
+                } else {
                     localStorage.setItem('aToken', data.token)
                     setAToken(data.token)
                 } else{
@@ -30,6 +36,10 @@ const Login = () => {
             } else {
                 const {data} = await axios.post(`${backendUrl}/api/doctor/login`, {email, password})
                 if (data.success) {
+                    localStorage.setItem('token', data.token)
+                    setToken(data.token)
+                    //navigate('/')
+                } else {
                     localStorage.setItem('dToken', data.token)
                     setDToken(data.token)
                     console.log(data.token);

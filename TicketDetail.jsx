@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import ticketService from '../../api/tickets';
-import { useAuth } from '../../context/AuthContext';
 import { useForm } from 'react-hook-form';
 import { ArrowLeftIcon } from '@heroicons/react/24/outline';
 import React from 'react';
 
 export default function TicketDetail() {
   const { id } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [ticket, setTicket] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -34,16 +32,13 @@ export default function TicketDetail() {
         setTicket(ticketData);
       } catch (err) {
         setError(err.message || 'Failed to fetch ticket');
-        if (err.message.includes('Not authorized') || err.response?.status === 403) {
-          navigate('/');
-        }
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchTicket();
-  }, [id, user.token, user.user.id, user.user.role, navigate]);
+  }, [id]);
 
   const onSubmit = async (data) => {
     try {
@@ -62,6 +57,10 @@ export default function TicketDetail() {
   const handleResolve = async () => {
     try {
       setIsSubmitting(true);
+      await ticketService.resolveTicket(id);
+      
+      // Refresh ticket data
+      const response = await ticketService.getTicket(id);
       await ticketService.resolveTicket(id, user.token);
       const response = await ticketService.getTicket(id, user.token);
       setTicket(response);
@@ -97,6 +96,8 @@ export default function TicketDetail() {
         onClick={() => navigate(-1)}
         className="flex items-center text-indigo-600 hover:text-indigo-800 mb-6"
       >
+        <ArrowLeftIcon className="h-5 w-5 mr-1" />
+        Back to Tickets
         <ArrowLeftIcon className="h-5 w-5 mr-2" />
         Back to {user.user.role === 'admin' ? 'Tickets' : 'Dashboard'}
       </button>
@@ -153,6 +154,8 @@ export default function TicketDetail() {
       </div>
 
       {ticket.status !== 'resolved' && (
+        <div className="mt-8">
+          <h3 className="text-lg font-medium mb-3">Add Response</h3>
         <div className="mt-10">
           <h3 className="text-lg font-medium mb-3 text-gray-800">
             {user.user.role === 'admin' ? 'Add Response' : 'Add Comment'}

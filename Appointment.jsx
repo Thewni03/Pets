@@ -9,8 +9,9 @@ import axios from 'axios';
 
 const Appointment = () => {
     const {docId} = useParams();
-    const {doctors, currencySymbol, backendUrl, token, getDoctorsData, pets} = useContext(AppContext);
+    const {doctors, currencySymbol, backendUrl, token, getDoctorsData} = useContext(AppContext);
     const daysOfWeek = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+    const [localPets, setLocalPets] = useState([]);
 
     const navigate = useNavigate()
 
@@ -25,6 +26,23 @@ const Appointment = () => {
         setDocInfo(docInfo)
     }
 
+    const fetchPets = async () => {
+        if (!token) {
+            setLocalPets([]);
+            return;
+        }
+        try {
+          const response = await axios.get(`${backendUrl}/api/pet/my-pets`, {
+            headers: { token }
+          });
+          setLocalPets(response.data.pets || []);
+
+        } catch (error) {
+          console.error("Error fetching pets:", error);
+          toast.error("Failed to fetch pets");
+        }
+      };
+
     const getAvailableSlots = async () => {
         if (!docInfo) return;
 
@@ -36,7 +54,7 @@ const Appointment = () => {
     
         let slotsArray = []; // Store all slots
     
-        for (let i = 0; i < 7; i++) {
+        for (let i = 0; i < 13; i++) {
             let currentDate = new Date(today);
             currentDate.setDate(today.getDate() + i);
     
@@ -185,7 +203,7 @@ const Appointment = () => {
         }
     }
     
-    console.log("Pets in context:", pets);
+    //console.log("Pets in context:", pets);
     console.log("Selected Pet ID:", selectedPet);
 
     useEffect(()=>{
@@ -203,6 +221,13 @@ const Appointment = () => {
     },[docSlots])
     console.log("Doctor Image URL:", docInfo?.image);
 
+    // useEffect(() => {
+    //     setLocalPets(pets || []);
+    //   }, [pets]);
+
+    useEffect(() => {
+        fetchPets();
+    }, [token]);
     
     return docInfo && (
         <div>
@@ -264,17 +289,17 @@ const Appointment = () => {
                     <select
                         value={selectedPet}
                         onChange={(e) => setSelectedPet(e.target.value)}
-                        disabled={!token || pets.length === 0}
+                        disabled={!token || localPets.length === 0}
                         className='border p-2 rounded w-full bg-white disabled:bg-gray-100 disabled:text-gray-400'
                     >
                         {!token && <option>No pets available. Please login.</option>}
-                        {token && pets.length === 0 && <option>No pets found. Please add one.</option>}
-                        {token && pets.length > 0 && (
+                        {token && localPets.length === 0 && <option>No pets found. Please add one.</option>}
+                        {token && localPets.length > 0 && (
                         <>
                             <option value="">Select a pet</option>
-                            {pets.map((pet) => (
+                            {localPets.map((pet) => (
                             <option key={pet._id} value={pet._id}>
-                                {pet.name} ({pet.type})
+                                {pet.Petname} ({pet.Species})
                             </option>
                             ))}
                         </>
@@ -282,7 +307,7 @@ const Appointment = () => {
                     </select>
 
                     {/* Optional Add Pet Button when logged in but no pets */}
-                    {token && pets.length === 0 && (
+                    {token && localPets.length === 0 && (
                         <button
                         onClick={() => navigate('/my-profile')}
                         className='mt-3 bg-blue-500 text-white px-4 py-2 rounded'

@@ -5,7 +5,6 @@ const Contact = () => {
     <div className="bg-white py-4 sm:py-2">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
         <div className="mx-auto max-w-2xl lg:text-center">
-          <h2 className="text-base/7 font-semibold text-indigo-600">Contact Us</h2>
           <p className="mt-2 text-4xl font-semibold tracking-tight text-pretty text-gray-900 sm:text-5xl lg:text-balance">
             Get in Touch with PetUniverse
           </p>
